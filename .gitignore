@@ -1,0 +1,6 @@
+
+bin/
+obj/
+.vs/
+App.js
+App.js.map
