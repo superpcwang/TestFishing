@@ -3,7 +3,7 @@ namespace App {
     export class FishBehaviorData implements Lib.IBehaviorData {
         public name: string;
         public speed: number = 1;
-        public life: number = 5;
+        public life: number = 1;
         public animator: string;
         public setFromJson(json: any): void {
             if (json.animator === undefined) {
@@ -46,7 +46,8 @@ namespace App {
 
     export class FishBehavior extends Lib.BaseBehavior implements Lib.IMessagehandler {
         private m_speed: number = 1;
-        private m_life: number = 5;
+        private m_life: number = 1;
+        private m_maxLife: number = 1;
         private m_fish: Lib.SimObject;
         private m_fishAnimatorName: string;
         private m_fishAnimator: Lib.AnimatorComponent;
@@ -55,7 +56,8 @@ namespace App {
             super(data);
             this.m_speed = data.speed;
             this.m_fishAnimatorName = data.animator;
-            this.m_life = data.life;
+            this.m_maxLife = data.life;
+            this.m_life = this.m_maxLife;
             this.m_fishState = fishState.run;
             Lib.Message.subscribe("COLLISION_ENTRY", this);
         }
@@ -89,7 +91,7 @@ namespace App {
                     if (this.m_owner.transform.position.x > 900) {
                         this.m_fishState = fishState.init;
                     }
-                    if (this.m_life < 0) {
+                    if (this.m_life <= 0) {
                         this.m_fishAnimator.setState(1);
                         this.m_fishState = fishState.stop;
                     }
@@ -99,7 +101,7 @@ namespace App {
                     this.m_owner.transform.position.x += this.m_speed / 4;
                     if (this.m_fishAnimator.isDone()) {
                         this.m_fishState = fishState.init;
-                        this.m_life = 5;
+                        this.m_life = this.m_maxLife;
                     }
                     break;
                 }
