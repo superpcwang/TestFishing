@@ -3,7 +3,14 @@ namespace App {
     export class FishBehaviorData implements Lib.IBehaviorData {
         public name: string;
         public speed: number = 1;
+        public life: number = 5;
+        public animator: string;
         public setFromJson(json: any): void {
+            if (json.animator === undefined) {
+                throw new Error("Animator must be defined in fishBehavior.");
+            }
+            this.animator = json.animator;
+
             if (json.name === undefined) {
                 throw new Error("Name must be defined in fishBehavior.");
             }
@@ -11,6 +18,10 @@ namespace App {
 
             if (json.speed !== undefined) {
                 this.speed = Number(json.speed);
+            }
+
+            if (json.life !== undefined) {
+                this.life = Number(json.life);
             }
         }
     }
@@ -27,60 +38,84 @@ namespace App {
         }
     }
 
+    enum fishState{
+        init,
+        run,
+        stop
+    }
+
     export class FishBehavior extends Lib.BaseBehavior implements Lib.IMessagehandler {
         private m_speed: number = 1;
         private m_life: number = 5;
+        private m_fish: Lib.SimObject;
+        private m_fishAnimatorName: string;
         private m_fishAnimator: Lib.AnimatorComponent;
+        private m_fishState: fishState;
         public constructor(data: FishBehaviorData) {
             super(data);
             this.m_speed = data.speed;
+            this.m_fishAnimatorName = data.animator;
+            this.m_life = data.life;
+            this.m_fishState = fishState.run;
             Lib.Message.subscribe("COLLISION_ENTRY", this);
         }
 
         public load(): void {
             super.load();
+            
+            this.m_fish = this.m_owner;
+            if (this.m_fish === undefined) {
+                throw new Error("Get fish owner error.");
+            }
+
+            this.m_fishAnimator = this.m_fish.getComponentByName(this.m_fishAnimatorName) as Lib.AnimatorComponent;
+            if (this.m_fishAnimator === undefined) {
+                throw new Error("Get fish: " + this.m_fish.name + " animator: " + this.m_fishAnimatorName + " error.");
+            }
         }
 
         public update(time: number): void {
             super.update(time);
-            this.m_owner.transform.position.x += this.m_speed;
-            let x = this.m_owner.transform.position.x;
-            if (x > 900) {
-                this.m_owner.transform.position.x = -100;
-            }
 
-            if (this.m_fishAnimator !== undefined) {
-                if (this.m_life < 0) {
-                    this.m_fishAnimator.setState(1);
-                    this.m_life = 1000;
-                }
-
-                if (this.m_life > 500 && this.m_fishAnimator.isDone()) {
-                    this.m_fishAnimator.getOwner().transform.position.x = -220;
-                    this.m_life = 5;
+            switch (this.m_fishState) {
+                case fishState.init: {
+                    this.m_owner.transform.position.x = -100;
+                    this.m_fishState = fishState.run;
                     this.m_fishAnimator.setState(0);
+                    break;
+                }
+                case fishState.run: {
+                    this.m_owner.transform.position.x += this.m_speed;
+                    if (this.m_owner.transform.position.x > 900) {
+                        this.m_fishState = fishState.init;
+                    }
+                    if (this.m_life < 0) {
+                        this.m_fishAnimator.setState(1);
+                        this.m_fishState = fishState.stop;
+                    }
+                    break;
+                }
+                case fishState.stop: {
+                    this.m_owner.transform.position.x += this.m_speed / 4;
+                    if (this.m_fishAnimator.isDone()) {
+                        this.m_fishState = fishState.init;
+                        this.m_life = 5;
+                    }
+                    break;
+                }
+                default: {
+                    throw new Error("Fish state error.");
                 }
             }
-
         }
 
         public onMessage(message: Lib.Message) {
             if (message.code === "COLLISION_ENTRY") {
                 let context = message.context as Lib.CollisionData;
-
-                let fish: Lib.SimObject;
-                if (context.a.name === "fish01Collision") {
-                    fish = context.a.getOwner();
-                }
-                else if (context.b.name === "fish01Collision") {
-                    fish = context.b.getOwner();
-                }
-                else {
-                    return;
-                }
-                this.m_fishAnimator = fish.getComponentByName("fish01Animator") as Lib.AnimatorComponent;
-                if (this.m_fishAnimator === undefined) {
-                    throw new Error("Get m_fishAnimator error.");
+                if (context.a.getOwner() != this.m_fish) {
+                    if (context.b.getOwner() != this.m_fish) {
+                        return;
+                    }
                 }
                 this.m_life--;
             }

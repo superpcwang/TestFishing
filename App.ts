@@ -15,6 +15,13 @@
             //Load material
             Lib.MaterialManager.registerMaterial(new Lib.Material("bg01", "asset/BG_01.png", new Lib.Color(255, 225, 225, 255)));
             Lib.MaterialManager.registerMaterial(new Lib.Material("fish02", "asset/fish02.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("fish03", "asset/fish03.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("fish04", "asset/fish04.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("cannonBar", "asset/bottom-bar.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("bullet", "asset/bullet.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("net01", "asset/net01f.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("cannon", "asset/cannon.png", new Lib.Color(255, 225, 225, 255)));
+            Lib.MaterialManager.registerMaterial(new Lib.Material("black", "asset/black.png", new Lib.Color(255, 225, 225, 255)));
 
             //Load Sound
             //Lib.AudioManager.loadSoundFile("swoosh", "asset/SWOOSH.mp3", false);
@@ -54,7 +61,7 @@
         public onMessage(message: Lib.Message) {
             if (message.code === "MOUSE_UP") {
                 let context = message.context as Lib.MouseContext;
-                document.title = `Pos: [${context.position.x}, ${context.position.y}]`;
+                document.title = `Fishing Game (BETA): [${context.position.x}, ${context.position.y}]`;
 
                 //Lib.AudioManager.playSound("swoosh");
             }

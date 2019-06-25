@@ -44,7 +44,7 @@
             CollisionManager.initialize();
 
             //Set clear color
-            gl.clearColor(0, 0, 0.3, 1);
+            gl.clearColor(0, 0, 0, 1);
             gl.enable(gl.BLEND);
 
             //PNG edge problem: https://stackoverflow.com/questions/39341564/webgl-how-to-correctly-blend-alpha-channel-png

@@ -84,7 +84,7 @@ namespace App {
                 let bulletRigidbody = new Lib.RigidbodyComponent();
                 let bulletCollision = new Lib.CollisionComponent(this.m_bulletCollisionData);
                 let bulletVelocity = Lib.Vector3.normalize(context.position.toVector3(), this.m_owner.transform.position);
-                bulletRigidbody.setVelocity(bulletVelocity.multiply(20));
+                bulletRigidbody.setVelocity(bulletVelocity.multiply(5));
                 bullet.addComponent(bulletRigidbody);
                 bullet.addComponent(bulletSprite);
                 bullet.addComponent(bulletCollision);

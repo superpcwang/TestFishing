@@ -175,7 +175,7 @@
         private m_frameSequence: number[] = [];
 
         //each frame time
-        private m_frameTime: number = 100;
+        private m_frameTime: number = -1;
         private m_frameUVs: UVInfo[] = [];
 
         private m_currentFrame: number = 0;
@@ -222,6 +222,7 @@
         public load(): void {
             super.load();
             this.calculateTotalUVs();
+            this.changeFrame(0);
         }
 
         public update(time: number): void {
@@ -248,23 +249,8 @@
                     }
                     
                 }
-
-                //change texture
                 let idx = this.m_frameSequence[this.m_currentFrame];
-                this.m_vertices[0].texCoords.copyFrom(this.m_frameUVs[idx].min);
-                this.m_vertices[1].texCoords = new Vector2(this.m_frameUVs[idx].min.x, this.m_frameUVs[idx].max.y);
-                this.m_vertices[2].texCoords.copyFrom(this.m_frameUVs[idx].max);
-                this.m_vertices[3].texCoords.copyFrom(this.m_frameUVs[idx].max);
-                this.m_vertices[4].texCoords = new Vector2(this.m_frameUVs[idx].max.x, this.m_frameUVs[idx].min.y);
-                this.m_vertices[5].texCoords.copyFrom(this.m_frameUVs[idx].min);
-
-                this.m_buffer.clearData();
-                for (let v of this.m_vertices) {
-                    this.m_buffer.pushBackData(v.toArray());
-                }
-
-                this.m_buffer.upload();
-                this.m_buffer.unbind();
+                this.changeFrame(idx);
             }
             super.update(time);
         }
@@ -289,6 +275,24 @@
                 let max: Vector2 = new Vector2(uMax, vMax);
                 this.m_frameUVs.push(new UVInfo(min, max));
             }
+        }
+
+        private changeFrame(idx: number) {
+            this.m_vertices[0].texCoords.copyFrom(this.m_frameUVs[idx].min);
+            this.m_vertices[1].texCoords = new Vector2(this.m_frameUVs[idx].min.x, this.m_frameUVs[idx].max.y);
+            this.m_vertices[2].texCoords.copyFrom(this.m_frameUVs[idx].max);
+            this.m_vertices[3].texCoords.copyFrom(this.m_frameUVs[idx].max);
+            this.m_vertices[4].texCoords = new Vector2(this.m_frameUVs[idx].max.x, this.m_frameUVs[idx].min.y);
+            this.m_vertices[5].texCoords.copyFrom(this.m_frameUVs[idx].min);
+
+            //upload to webgl
+            this.m_buffer.clearData();
+            for (let v of this.m_vertices) {
+                this.m_buffer.pushBackData(v.toArray());
+            }
+
+            this.m_buffer.upload();
+            this.m_buffer.unbind();
         }
 
         private calculateUVs(): void {
